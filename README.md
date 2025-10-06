@@ -233,9 +233,7 @@ This project is created for educational purposes as part of the CLDV6212 course.
 - [ASP.NET Core Documentation](https://docs.microsoft.com/aspnet/core/)
 - [Azure Functions Documentation](https://docs.microsoft.com/azure/azure-functions/)
 
-## 🤝 Contributing
 
-This is an academic project. For course-related questions, please contact your instructor.
 
 ## ⚠️ Important Notes
 
