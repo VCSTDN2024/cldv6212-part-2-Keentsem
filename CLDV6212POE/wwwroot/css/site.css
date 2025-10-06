@@ -1,0 +1,247 @@
+/* ABC Retail - Professional Retail Dashboard Theme */
+
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  background-color: #FFFFFF;
+  color: #333333;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin-bottom: 60px;
+}
+
+/* ABC Retail Branding Colors */
+:root {
+  --abc-red: #DC3545;
+  --abc-gold: #FFD700;
+  --abc-dark: #333333;
+  --abc-light: #F8F9FA;
+  --abc-gray: #6C757D;
+}
+
+/* Header Styling */
+.abc-header {
+  background: linear-gradient(135deg, var(--abc-red) 0%, #C82333 100%);
+  color: #FFFFFF;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.abc-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.abc-logo {
+  color: var(--abc-gold);
+  font-weight: bold;
+  font-size: 32px;
+}
+
+/* Navigation */
+.navbar {
+  background-color: var(--abc-light) !important;
+  border-bottom: 3px solid var(--abc-red);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+  color: var(--abc-red) !important;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.nav-link {
+  color: var(--abc-dark) !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--abc-red) !important;
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--abc-red);
+  border-color: var(--abc-red);
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #C82333;
+  border-color: #BD2130;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.btn-success {
+  background-color: #28A745;
+  border-color: #28A745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1E7E34;
+  transform: translateY(-2px);
+}
+
+/* Cards - Retail Style */
+.card {
+  border: 2px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--abc-red);
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15);
+  transform: translateY(-3px);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--abc-red) 0%, #C82333 100%);
+  color: #FFFFFF;
+  font-weight: bold;
+  border-radius: 8px 8px 0 0;
+  padding: 15px 20px;
+  margin: -20px -20px 20px -20px;
+}
+
+/* Form Controls */
+.form-control {
+  border: 2px solid #E9ECEF;
+  border-radius: 8px;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--abc-red);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-label {
+  color: var(--abc-dark);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Product Image Preview */
+.product-preview {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border: 3px solid var(--abc-red);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.product-preview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Blob/Product Items */
+.blob-item {
+  background: var(--abc-light);
+  border: 2px solid #E9ECEF;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+}
+
+.blob-item:hover {
+  border-color: var(--abc-gold);
+  background: #FFFEF0;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.alert-success {
+  border-left-color: #28A745;
+  background-color: #D4EDDA;
+}
+
+.alert-danger {
+  border-left-color: var(--abc-red);
+  background-color: #F8D7DA;
+}
+
+.alert-info {
+  border-left-color: #17A2B8;
+  background-color: #D1ECF1;
+}
+
+/* Badges */
+.badge {
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 600;
+}
+
+/* Icons */
+.icon-accent {
+  color: var(--abc-red);
+  margin-right: 8px;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--abc-dark);
+  color: #FFFFFF;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Loading Spinner */
+.spinner-border-red {
+  border-color: var(--abc-red);
+  border-right-color: transparent;
+}
+
+/* Responsive Tables */
+.table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead {
+  background-color: var(--abc-red);
+  color: #FFFFFF;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--abc-red);
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}

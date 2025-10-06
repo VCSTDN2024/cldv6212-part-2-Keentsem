@@ -1,0 +1,260 @@
+@model IEnumerable<CLDV6212POE.Models.ProductEntity>
+@{
+    ViewData["Title"] = "ABC Retail - Product Management";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        .pixel-retro {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f3c34e;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(45, 45, 45, 0.9);
+            border: 2px solid #f3c34e;
+            border-radius: 8px;
+        }
+        .card-header {
+            background: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #f3c34e;
+            border-color: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background: #e6b143;
+            border-color: #e6b143;
+        }
+        .product-card {
+            background: rgba(243, 195, 78, 0.1);
+            border: 1px solid #f3c34e;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            background: rgba(243, 195, 78, 0.2);
+            transform: translateY(-2px);
+        }
+        .product-icon {
+            color: #f3c34e;
+            font-size: 2em;
+        }
+        .price-tag {
+            background: #f3c34e;
+            color: #1a1a1a;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="pixel-retro">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-boxes"></i> Product Management</h1>
+                <p class="lead">Manage products in Azure Table Storage</p>
+                <hr />
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        @if (TempData["Msg"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> @TempData["Msg"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Storage Info -->
+        <div class="alert alert-info">
+            <i class="fas fa-cloud"></i>
+            <strong>Azure Table Storage:</strong> Products | 
+            <strong>Storage Account:</strong> klmazureapp1
+            <br />
+            <small>
+                <strong>Azure Portal:</strong> Storage accounts → klmazureapp1 → Tables → Products
+            </small>
+        </div>
+
+        <!-- Actions -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a href="@Url.Action("AddProduct", "TableStorage")" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus"></i> Add New Product
+                </a>
+                <button id="refreshProductsBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-sync"></i> Refresh List
+                </button>
+            </div>
+        </div>
+
+        <!-- Product List Section -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-warehouse"></i> Product Catalog</h4>
+            </div>
+            <div class="card-body">
+                <div id="productsList">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Loading products...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-4 text-center">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="@Url.Action("Customers")" class="btn btn-outline-primary">
+                <i class="fas fa-users"></i> Customer Management
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load products on page load
+        loadProducts();
+
+        function loadProducts() {
+            const productsList = document.getElementById('productsList');
+            
+            fetch('/TableStorage/GetProducts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load products');
+                    }
+                    return response.json();
+                })
+                .then(response => {
+                    console.log('Products loaded:', response);
+                    
+                    // Handle API response format: { success: true, data: [...], count: 0, ... }
+                    let products = [];
+                    if (response && Array.isArray(response.data)) {
+                        products = response.data;
+                    } else if (Array.isArray(response)) {
+                        products = response;
+                    }
+                    
+                    if (!Array.isArray(products) || products.length === 0) {
+                        productsList.innerHTML = `
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                <h5>No products found</h5>
+                                <p>Add your first product using the button above.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '<div class="row">';
+                    products.forEach(product => {
+                        const categoryIcon = getCategoryIcon(product.category);
+                        html += `
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="product-card">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="${categoryIcon} product-icon me-3"></i>
+                                        <div>
+                                            <h5 class="mb-1">${product.name || product.productName}</h5>
+                                            <small class="text-muted">SKU: ${product.sku || product.rowKey}</small>
+                                        </div>
+                                    </div>
+                                    <div class="product-details">
+                                        <div class="mb-2">
+                                            <span class="price-tag">R${parseFloat(product.price || 0).toFixed(2)}</span>
+                                        </div>
+                                        <p class="mb-2">
+                                            <i class="fas fa-tag me-2"></i>
+                                            <strong>Category:</strong> ${product.category || 'Uncategorized'}
+                                        </p>
+                                        <p class="mb-2">
+                                            <i class="fas fa-cubes me-2"></i>
+                                            <strong>Stock:</strong> ${product.stock || 'N/A'}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-key me-2"></i>
+                                            <strong>Partition:</strong> ${product.partitionKey}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    productsList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading products:', error);
+                    productsList.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading products: ${error.message}
+                            <br><small>Make sure the TableStorage controller and GetProducts method are working properly.</small>
+                        </div>
+                    `;
+                });
+        }
+
+        function getCategoryIcon(category) {
+            if (!category) return 'fas fa-box';
+            
+            switch (category.toLowerCase()) {
+                case 'electronics': return 'fas fa-laptop';
+                case 'clothing': return 'fas fa-tshirt';
+                case 'books': return 'fas fa-book';
+                case 'home & garden': return 'fas fa-home';
+                case 'sports': return 'fas fa-football-ball';
+                case 'food & beverages': return 'fas fa-utensils';
+                default: return 'fas fa-box';
+            }
+        }
+
+        // Refresh products button
+        document.getElementById('refreshProductsBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+            
+            loadProducts();
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

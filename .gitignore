@@ -1,0 +1,20 @@
+.vs/
+*.vsidx
+nul
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+
+# Azure Function settings
+local.settings.json
+
+# Configuration files with secrets
+appsettings.json
+appsettings.*.json
+!appsettings.Development.json.example

@@ -1,0 +1,308 @@
+@{
+    ViewData["Title"] = "ABC Retail - Contract File Share";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        .pixel-retro {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f3c34e;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(45, 45, 45, 0.9);
+            border: 2px solid #f3c34e;
+            border-radius: 8px;
+        }
+        .card-header {
+            background: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #f3c34e;
+            border-color: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background: #e6b143;
+            border-color: #e6b143;
+        }
+        .file-item {
+            background: rgba(243, 195, 78, 0.1);
+            border: 1px solid #f3c34e;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .file-icon {
+            color: #f3c34e;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body class="pixel-retro">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-file-contract"></i> Contract File Share</h1>
+                <p class="lead">Manage documents in Azure File Share</p>
+                <hr />
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ContractDetails"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle"></i> @TempData["ContractDetails"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Storage Info -->
+        <div class="alert alert-info">
+            <i class="fas fa-cloud"></i>
+            <strong>Azure File Share:</strong> contracts | 
+            <strong>Storage Account:</strong> klmazureapp1
+            <br />
+            <small>
+                <strong>Azure Portal:</strong> Storage accounts → klmazureapp1 → File shares → contracts
+            </small>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-upload"></i> Upload Contract Document</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Storage/UploadContract" enctype="multipart/form-data" 
+                      onsubmit="console.log('=== CONTRACT UPLOAD START ==='); 
+                                console.log('File:', document.getElementById('contractFile').files[0]); 
+                                return true;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="directory" value="contracts" />
+                    <div class="mb-3">
+                        <label for="contractFile" class="form-label">Select Contract Document:</label>
+                        <input type="file" name="file" id="contractFile" class="form-control" 
+                               accept=".pdf,.doc,.docx,.txt,.rtf,.odt" required 
+                               onchange="console.log('Contract file selected:', this.files[0]);">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" 
+                            onclick="console.log('Upload contract button clicked');">
+                        <i class="fas fa-upload"></i> Upload Contract
+                    </button>
+                    <div class="form-text mt-2">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, RTF, ODT (max 50MB)
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- File List Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4><i class="fas fa-folder-open"></i> Stored Contracts</h4>
+            </div>
+            <div class="card-body">
+                <div id="contractsList">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Loading contracts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <button id="refreshContractsBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-sync"></i> Refresh Contract List
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-4 text-center">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="@Url.Action("BlobStorage")" class="btn btn-outline-primary">
+                <i class="fas fa-images"></i> Product Gallery
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load contracts on page load
+        loadContracts();
+
+        function loadContracts() {
+            const contractsList = document.getElementById('contractsList');
+            
+            fetch('/Storage/ListFiles?directory=contracts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load contracts');
+                    }
+                    return response.json();
+                })
+                .then(response => {
+                    console.log('Contracts loaded:', response);
+                    console.log('Response type:', typeof response);
+                    console.log('Response.data:', response.data);
+                    console.log('Response.data type:', typeof response.data);
+                    
+                    // Handle API response format: { success: true, data: [...], count: 0, ... }
+                    let files = [];
+                    if (response && Array.isArray(response.data)) {
+                        files = response.data;
+                        console.log('Using response.data as files array');
+                    } else if (Array.isArray(response)) {
+                        files = response;
+                        console.log('Using response as files array');
+                    } else if (response && Array.isArray(response.files)) {
+                        files = response.files;
+                        console.log('Using response.files as files array');
+                    } else {
+                        console.error('Could not find files array in response:', response);
+                        files = [];
+                    }
+                    
+                    console.log('Final files array:', files);
+                    console.log('Files array type:', typeof files);
+                    console.log('Files is array:', Array.isArray(files));
+                    
+                    if (!Array.isArray(files) || files.length === 0) {
+                        contractsList.innerHTML = `
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                <h5>No contracts uploaded yet</h5>
+                                <p>Upload your first contract using the form above.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    files.forEach(file => {
+                        const fileIcon = getFileIcon(file);
+                        const fileSize = 'Unknown size'; // API doesn't provide size
+                        
+                        html += `
+                            <div class="file-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="${fileIcon} file-icon me-3"></i>
+                                    <div>
+                                        <strong>${file}</strong>
+                                        <br />
+                                        <small class="text-muted">Size: ${fileSize}</small>
+                                    </div>
+                                </div>
+                                <div>
+                                    <a href="/Storage/DownloadFile?directory=contracts&fileName=${encodeURIComponent(file)}" 
+                                       class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    contractsList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading contracts:', error);
+                    contractsList.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Error loading contracts: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            switch (ext) {
+                case 'pdf': return 'fas fa-file-pdf';
+                case 'doc':
+                case 'docx': return 'fas fa-file-word';
+                case 'txt': return 'fas fa-file-alt';
+                case 'rtf': return 'fas fa-file-alt';
+                case 'odt': return 'fas fa-file-alt';
+                default: return 'fas fa-file';
+            }
+        }
+
+        // Refresh contracts button
+        document.getElementById('refreshContractsBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+            
+            loadContracts();
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        });
+
+        // File validation
+        document.getElementById('contractFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (50MB = 50 * 1024 * 1024 bytes)
+                if (file.size > 50 * 1024 * 1024) {
+                    alert('File size must be less than 50MB');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Check file type
+                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/rtf', 'application/vnd.oasis.opendocument.text'];
+                const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedExtensions.includes(fileExtension)) {
+                    alert('Please select a valid document file (PDF, DOC, DOCX, TXT, RTF, ODT)');
+                    e.target.value = '';
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

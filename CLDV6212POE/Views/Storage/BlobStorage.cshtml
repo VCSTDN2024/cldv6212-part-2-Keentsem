@@ -1,0 +1,365 @@
+@{
+    ViewData["Title"] = "ABC Retail - Product Gallery";
+    var blobs = ViewBag.Blobs as IEnumerable<CLDV6212POE.Services.BlobInfo> ?? new List<CLDV6212POE.Services.BlobInfo>();
+    var diagnostics = ViewBag.Diagnostics as Dictionary<string, object> ?? new Dictionary<string, object>();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        .diagnostic-info {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .blob-card {
+            transition: transform 0.2s;
+            border: 1px solid #e9ecef;
+        }
+
+            .blob-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            margin: 20px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <h1><i class="fas fa-images"></i> ABC Retail Product Gallery</h1>
+                <p class="lead">Manage product images for your retail catalog</p>
+                <hr />
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+                @if (TempData["BlobName"] != null)
+                {
+                    <br>
+
+                    <strong>Blob Name:</strong> @TempData["BlobName"]
+                    <br>
+
+                    <strong>Size:</strong> @(((long)(TempData["BlobSize"] ?? 0)) / 1024)
+
+                }
+                @if (TempData["PortalInfo"] != null)
+                {
+                    <br>
+
+                    <small class="text-muted"><i class="fas fa-info-circle"></i> @TempData["PortalInfo"]</small>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                @if (TempData["TechnicalError"] != null)
+                {
+                    <br>
+
+                    <small><strong>Technical Details:</strong></small>
+                    <pre style="font-size: 0.8em; max-height: 200px; overflow-y: auto;">@TempData["TechnicalError"]</pre>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> @ViewBag.Error
+            </div>
+        }
+
+        <!-- Diagnostic Information -->
+        <div class="diagnostic-info">
+            <h5><i class="fas fa-info-circle"></i> Product Catalog Information</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Cloud Storage:</strong> klmazureapp1<br>
+                    <strong>Catalog:</strong> Product Images<br>
+                    <strong>Total Products:</strong> @ViewBag.BlobCount
+                </div>
+                <div class="col-md-6">
+                    @if (diagnostics.ContainsKey("ContainerExists"))
+                    {
+                        <strong>Catalog Status:</strong>
+                        <span class="status-badge @((bool)diagnostics["ContainerExists"] ? "status-success" : "status-error")">
+                            @((bool)diagnostics["ContainerExists"] ? "ACTIVE" : "UNAVAILABLE")
+                        </span>
+
+                        <br>
+                    }
+                    @if (diagnostics.ContainsKey("ContainerAccessLevel"))
+                    {
+                        <strong>Access Level:</strong> @diagnostics["ContainerAccessLevel"]
+
+                        <br>
+                    }
+                </div>
+            </div>
+            <small class="text-muted">
+                <i class="fas fa-cloud"></i>
+                <strong>Cloud Storage:</strong> Powered by Azure Blob Storage (klmazureapp1)
+            </small>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-upload"></i> Add New Product to Catalog</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Storage/UploadImage" enctype="multipart/form-data"
+                      onsubmit="console.log('=== FORM SUBMISSION START ===');
+                                console.log('File:', document.getElementById('file').files[0]);
+                                console.log('Action:', this.action);
+                                console.log('Method:', this.method);
+                                return true;">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select Product Image:</label>
+                        <input type="file" name="file" id="file" class="form-control" accept="image/*" required
+                               onchange="console.log('File selected:', this.files[0]);">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg"
+                            onclick="console.log('Upload button clicked');">
+                        <i class="fas fa-plus-circle"></i> Add to Product Catalog
+                    </button>
+                    <div class="form-text mt-2">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>Tip:</strong> Product images are automatically organized with timestamps
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <button id="refreshBtn" class="btn btn-outline-primary">
+                    <i class="fas fa-sync"></i> Refresh Catalog
+                </button>
+                <a href="@Url.Action("CreateSampleImage")" class="btn btn-success">
+                    <i class="fas fa-image"></i> Add Sample Product
+                </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/Storage/Diagnostics" class="btn btn-outline-secondary">
+                    <i class="fas fa-chart-line"></i> System Diagnostics
+                </a>
+            </div>
+        </div>
+
+        <!-- Blob List -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4><i class="fas fa-box-open"></i> Product Catalog (@ViewBag.BlobCount Items)</h4>
+                <span class="badge bg-primary">@ViewBag.BlobCount products</span>
+            </div>
+            <div class="card-body">
+                @if (blobs.Any())
+                {
+                    <div class="row" id="blobContainer">
+                        @foreach (var blob in blobs)
+                        {
+                            <div class="col-md-4 col-lg-3 mb-3">
+                                <div class="card blob-card h-100">
+                                    @if (!string.IsNullOrEmpty(blob.ContentType) && blob.ContentType.StartsWith("image/"))
+                                    {
+                                        <img src="@blob.Url" class="card-img-top" style="height: 200px; object-fit: contain; background-color: #f8f9fa;" alt="@blob.Name">
+                                    }
+                                    else
+                                    {
+                                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                                            <i class="fas fa-file fa-3x text-muted"></i>
+                                        </div>
+                                    }
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title text-truncate" title="@blob.Name">@blob.Name</h6>
+                                        <p class="card-text small">
+                                            <strong>Size:</strong> @(blob.Size / 1024) KB<br>
+                                            <strong>Modified:</strong> @(blob.LastModified?.ToString("yyyy-MM-dd HH:mm") ?? "Unknown")<br>
+                                            <strong>Type:</strong> @(blob.ContentType ?? "Unknown")
+                                        </p>
+                                    </div>
+                                    <div class="card-footer p-2">
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="@Url.Action("DownloadBlob", new { blobName = blob.Name })"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <a href="@blob.Url" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </a>
+                                            <form asp-action="DeleteBlob" method="post" style="display: inline;"
+                                                  onsubmit="return confirm('Delete @blob.Name?')">
+                                                <input type="hidden" name="blobName" value="@blob.Name" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-box-open fa-2x mb-3"></i>
+                        <h5>No products in catalog yet</h5>
+                        <p>Add your first product image using the form above. Your product will appear here instantly!</p>
+                        <ol class="list-unstyled">
+                            <li><i class="fas fa-check"></i> Upload product images to showcase your inventory</li>
+                            <li><i class="fas fa-check"></i> Images are stored securely in the cloud</li>
+                            <li><i class="fas fa-check"></i> Perfect for e-commerce catalogs and marketing materials</li>
+                        </ol>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-4 text-center">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="@Url.Action("FileShare")" class="btn btn-outline-primary">
+                <i class="fas fa-file-contract"></i> Contracts & Documents
+            </a>
+            <a href="@Url.Action("Queue")" class="btn btn-outline-primary">
+                <i class="fas fa-bell"></i> Order Notifications
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File validation
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (5MB = 5 * 1024 * 1024 bytes)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Please select a valid image file (JPEG, PNG, GIF, BMP)');
+                    e.target.value = '';
+                    return;
+                }
+            }
+        });
+
+        // Upload form submission with loading indicator
+        const uploadForm = document.querySelector('form[action="/Storage/UploadImage"]');
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(e) {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                submitBtn.disabled = true;
+
+                // Re-enable button after 30 seconds as fallback
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 30000);
+            });
+        }
+
+        // Refresh blob list via API
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+
+            fetch('/Storage/ListBlobs')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Refresh successful:', data);
+                        location.reload(); // Simple refresh for now
+                    } else {
+                        alert('Error refreshing: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Refresh error:', error);
+                    alert('Error refreshing blob list');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+        });
+
+        // Auto-refresh every 30 seconds
+        setTimeout(() => {
+            if (document.visibilityState === 'visible') {
+                document.getElementById('refreshBtn').click();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

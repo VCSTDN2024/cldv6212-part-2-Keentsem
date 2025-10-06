@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ABC Retail Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header class="abc-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><span class="abc-logo">ABC</span> Retail Management System</h1>
+                <div class="text-white">
+                    <i class="fas fa-shopping-cart"></i> Cloud Storage Dashboard
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-store icon-accent"></i>ABC Retail
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Storage/BlobStorage">
+                            <i class="fas fa-images"></i> Product Images
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Storage/FileShare">
+                            <i class="fas fa-file-contract"></i> Contracts & Docs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Storage/Queue">
+                            <i class="fas fa-bell"></i> Order Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/TableStorage">
+                            <i class="fas fa-users"></i> Customer Directory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/AzureFunctions">
+                            <i class="fas fa-cloud"></i> Order Processing
+                        </a>
+                    </li>
+                </ul>
+                <span class="navbar-text">
+                    <i class="fas fa-database icon-accent"></i> klmazureapp1
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer mt-auto py-3">
+        <div class="container text-center">
+            <span class="text-white">
+                &copy; 2025 ABC Retail Management System |
+                <i class="fas fa-cloud"></i> Powered by Azure Cloud Services
+            </span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

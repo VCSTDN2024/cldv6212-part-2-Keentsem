@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "Queue Test - SIMPLE";
+}
+
+<h1>SIMPLE QUEUE TEST</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div style="background: green; color: white; padding: 20px; margin: 20px 0; font-size: 20px;">
+        SUCCESS: @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div style="background: red; color: white; padding: 20px; margin: 20px 0; font-size: 20px;">
+        ERROR: @TempData["Error"]
+    </div>
+}
+
+<form method="post" action="/Storage/SendMessage">
+    @Html.AntiForgeryToken()
+
+    <label style="font-size: 18px;">Message:</label><br/>
+    <input type="text" name="message" value="Test message from simple form" style="width: 400px; padding: 10px; font-size: 16px;" required /><br/><br/>
+
+    <input type="hidden" name="queueType" value="CustomerNotification" />
+
+    <button type="submit" style="padding: 15px 30px; font-size: 18px; background: blue; color: white;">SEND TO QUEUE</button>
+</form>
+
+<p style="margin-top: 30px;">
+    <a href="/Storage/Queue">Back to fancy queue page</a>
+</p>

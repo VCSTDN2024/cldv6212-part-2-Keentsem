@@ -1,0 +1,203 @@
+@{
+    ViewData["Title"] = "ABC Retail - Azure Functions Management";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">
+            <i class="fas fa-cloud"></i> ABC Retail Order Processing System
+        </h1>
+        <p class="lead text-muted">Cloud-Powered Azure Functions for Scalable Retail Operations</p>
+        <p class="text-muted">Manage orders, product images, supplier contracts, and customer notifications through serverless Azure Functions</p>
+    </div>
+
+    <div class="row">
+        <!-- Section 1: Table Storage - Customer Orders -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Customer Order Registration
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Store customer order information in Azure Table Storage for real-time tracking</p>
+                    <form method="post" asp-action="AddToTable">
+                        <div class="form-group mb-3">
+                            <label for="studentId"><i class="fas fa-hashtag"></i> Order ID:</label>
+                            <input type="text" class="form-control" id="studentId" name="studentId" required placeholder="e.g., ORD-2025-001">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="studentName"><i class="fas fa-user"></i> Customer Name:</label>
+                            <input type="text" class="form-control" id="studentName" name="studentName" required placeholder="e.g., John Smith">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save"></i> Register Order
+                        </button>
+                    </form>
+                    @if (ViewBag.TableMessage != null)
+                    {
+                        <div class="alert alert-info mt-3" style="background-color: #d4edda; border-color: #c3e6cb; color: #155724;">
+                            @ViewBag.TableMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Blob Storage - Product Images -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-images"></i> Product Image Upload
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Upload product images to Azure Blob Storage for fast access during peak shopping seasons</p>
+                    <form method="post" asp-action="UploadBlob" enctype="multipart/form-data">
+                        <div class="form-group mb-3">
+                            <label for="blobFile"><i class="fas fa-file-image"></i> Select Product Image:</label>
+                            <input type="file" class="form-control" id="blobFile" name="blobFile" required accept="image/*">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="blobName"><i class="fas fa-tag"></i> Product Image Name:</label>
+                            <input type="text" class="form-control" id="blobName" name="blobName" placeholder="e.g., product-laptop-001.jpg (optional)">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Product Image
+                        </button>
+                    </form>
+                    @if (ViewBag.BlobMessage != null)
+                    {
+                        <div class="alert alert-info mt-3" style="background-color: #cce5ff; border-color: #b8daff; color: #004085;">
+                            @ViewBag.BlobMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: File Share - Supplier Contracts -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-header text-white" style="background-color: #6f42c1;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-contract"></i> Contract & Document Management
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Store supplier contracts and business documents in Azure File Share for secure access</p>
+                    <form method="post" asp-action="UploadFileShare" enctype="multipart/form-data">
+                        <div class="form-group mb-3">
+                            <label for="fileShareDoc"><i class="fas fa-file-pdf"></i> Select Contract/Document:</label>
+                            <input type="file" class="form-control" id="fileShareDoc" name="fileShareDoc" required accept=".pdf,.doc,.docx,.txt">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="fileShareName"><i class="fas fa-signature"></i> Document Name:</label>
+                            <input type="text" class="form-control" id="fileShareName" name="fileShareName" placeholder="e.g., supplier-contract-2025.pdf (optional)">
+                        </div>
+                        <button type="submit" class="btn text-white w-100" style="background-color: #6f42c1;">
+                            <i class="fas fa-upload"></i> Upload Contract
+                        </button>
+                    </form>
+                    @if (ViewBag.FileMessage != null)
+                    {
+                        <div class="alert alert-info mt-3" style="background-color: #e7d9f5; border-color: #d1b3e8; color: #3d1a6b;">
+                            @ViewBag.FileMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Queue Storage - Order Notifications -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-warning h-100">
+                <div class="card-header text-white" style="background-color: #fd7e14;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bell"></i> Order Notification Queue
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Send and receive customer order notifications through Azure Queue for reliable message delivery</p>
+                    <!-- Send Message Form -->
+                    <form method="post" asp-action="SendQueueMessage">
+                        <div class="form-group mb-3">
+                            <label for="queueMessage"><i class="fas fa-envelope"></i> Order Notification:</label>
+                            <input type="text" class="form-control" id="queueMessage" name="queueMessage" required placeholder="e.g., Order ORD-2025-001 confirmed - Ship to John Smith">
+                        </div>
+                        <button type="submit" class="btn text-white w-100 mb-2" style="background-color: #fd7e14;">
+                            <i class="fas fa-paper-plane"></i> Send Notification
+                        </button>
+                    </form>
+
+                    <!-- Receive Message Form -->
+                    <form method="post" asp-action="ReceiveQueueMessage">
+                        <button type="submit" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-inbox"></i> Check Queue Messages
+                        </button>
+                    </form>
+
+                    @if (ViewBag.QueueMessage != null)
+                    {
+                        <div class="alert alert-info mt-3" style="background-color: #ffe5cc; border-color: #ffd5b3; color: #7a3e00;">
+                            @ViewBag.QueueMessage
+                        </div>
+                    }
+                    @if (ViewBag.ReceivedMessage != null)
+                    {
+                        <div class="alert alert-success mt-3">
+                            <strong><i class="fas fa-check-circle"></i> Message Received:</strong><br/>
+                            @ViewBag.ReceivedMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABC Retail Business Context Info -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <h5><i class="fas fa-info-circle"></i> ABC Retail Cloud Infrastructure:</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="mb-2">
+                            <li><strong>Table Storage:</strong> Real-time customer order tracking and inventory management</li>
+                            <li><strong>Blob Storage:</strong> Scalable product image storage optimized for peak shopping seasons (Christmas, Black Friday)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-2">
+                            <li><strong>File Share:</strong> Secure supplier contracts and business documentation</li>
+                            <li><strong>Queue Storage:</strong> Reliable order processing and customer notification delivery</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-server"></i> <strong>Azure Functions Status:</strong> Running on port 7071 |
+                    <i class="fas fa-database"></i> <strong>Storage Account:</strong> klmazureapp1 |
+                    <i class="fas fa-check-circle"></i> <strong>All services operational</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+</style>

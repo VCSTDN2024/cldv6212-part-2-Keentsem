@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Queue Diagnostics Test";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body { padding: 20px; background: #1a1a1a; color: #f3c34e; font-family: 'Courier New', monospace; }
+        .test-card { background: #2d2d2d; border: 2px solid #f3c34e; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #00bfff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Queue Diagnostics Test</h1>
+        
+        <div class="test-card">
+            <h3>Test 1: Send to CustomerNotification Queue</h3>
+            <form method="post" action="/Storage/SendMessage">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="queueType" value="CustomerNotification" />
+                <div class="mb-3">
+                    <label>Message:</label>
+                    <input type="text" name="message" class="form-control" value="Test message @DateTime.Now.ToString("HH:mm:ss")" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Send to customernotification</button>
+            </form>
+        </div>
+
+        <div class="test-card">
+            <h3>Test 2: Send to StudentFiles Queue</h3>
+            <form method="post" action="/Storage/SendMessage">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="queueType" value="StudentFiles" />
+                <div class="mb-3">
+                    <label>Message:</label>
+                    <input type="text" name="message" class="form-control" value="Student file test @DateTime.Now.ToString("HH:mm:ss")" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Send to studentfiles</button>
+            </form>
+        </div>
+
+        <div class="test-card">
+            <h3>Test 3: Direct Queue Test (Bypass Controller)</h3>
+            <button onclick="testDirectQueue()" class="btn btn-warning">Test Direct Queue Connection</button>
+            <pre id="directTestResult" class="mt-3"></pre>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <strong>✅ Success:</strong> @TempData["Success"]
+                <br><strong>Details:</strong> @TempData["MessageDetails"]
+                <br><strong>Queue:</strong> @TempData["QueueName"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <strong>❌ Error:</strong> @TempData["Error"]
+            </div>
+        }
+
+        <div class="test-card">
+            <h3>📋 Instructions to Verify in Azure Storage Explorer:</h3>
+            <ol>
+                <li>Open Azure Storage Explorer</li>
+                <li>Connect to storage account: <strong>klmazureapp1</strong></li>
+                <li>Navigate to: <strong>Queues</strong></li>
+                <li>Check queues:
+                    <ul>
+                        <li><strong>customernotification</strong> - Should have messages from Test 1</li>
+                        <li><strong>studentfiles</strong> - Should have messages from Test 2</li>
+                    </ul>
+                </li>
+                <li>Right-click queue → <strong>View Messages</strong> to see content</li>
+            </ol>
+        </div>
+
+        <div class="test-card">
+            <h3>🔧 Troubleshooting Steps:</h3>
+            <ul>
+                <li>Check console logs for "[StorageController] === QUEUE MESSAGE SENT SUCCESSFULLY ==="</li>
+                <li>Verify connection string in appsettings.json</li>
+                <li>Ensure queues exist in Azure Portal</li>
+                <li>Check for any firewall/network issues</li>
+            </ul>
+        </div>
+
+        <a href="/Storage/Queue" class="btn btn-secondary mt-3">← Back to Queue Page</a>
+    </div>
+
+    <script>
+        async function testDirectQueue() {
+            const resultDiv = document.getElementById('directTestResult');
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/Diagnostics/TestAzureConnections');
+                const data = await response.json();
+                
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+                resultDiv.className = 'success';
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

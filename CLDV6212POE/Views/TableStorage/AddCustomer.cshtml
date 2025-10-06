@@ -1,0 +1,207 @@
+@model CLDV6212POE.Models.CustomerEntity
+@{
+    ViewData["Title"] = "ABC Retail - Add Customer";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        .pixel-retro {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f3c34e;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(45, 45, 45, 0.9);
+            border: 2px solid #f3c34e;
+            border-radius: 8px;
+        }
+        .card-header {
+            background: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #f3c34e;
+            border-color: #f3c34e;
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background: #e6b143;
+            border-color: #e6b143;
+        }
+        .form-control {
+            background: rgba(45, 45, 45, 0.8);
+            border: 1px solid #f3c34e;
+            color: #f3c34e;
+        }
+        .form-control:focus {
+            background: rgba(45, 45, 45, 0.9);
+            border-color: #f3c34e;
+            box-shadow: 0 0 0 0.2rem rgba(243, 195, 78, 0.25);
+            color: #f3c34e;
+        }
+        .form-label {
+            color: #f3c34e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="pixel-retro">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-plus"></i> Add Customer Profile</h2>
+                        <p class="mb-0 text-muted">Store customer information in Azure Table Storage</p>
+                    </div>
+                    <div class="card-body">
+                        @if (TempData["Msg"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle"></i> @TempData["Msg"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form action="/TableStorage/AddCustomer" method="post" class="needs-validation" novalidate 
+                              onsubmit="console.log('=== CUSTOMER FORM SUBMIT ==='); 
+                                        console.log('FirstName:', document.getElementById('FirstName').value);
+                                        console.log('LastName:', document.getElementById('LastName').value);
+                                        console.log('Email:', document.getElementById('Email').value);
+                                        return true;">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input name="FirstName" type="text" class="form-control" id="FirstName" required />
+                                    <div class="invalid-feedback">Please provide a valid first name.</div>
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input name="LastName" type="text" class="form-control" id="LastName" required />
+                                    <div class="invalid-feedback">Please provide a valid last name.</div>
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                <input name="Email" type="email" class="form-control" id="Email" required />
+                                <div class="invalid-feedback">Please provide a valid email address.</div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Phone" class="form-label">Phone Number</label>
+                                <input name="Phone" type="tel" class="form-control" id="Phone" placeholder="+27 12 345 6789" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="PartitionKey" class="form-label">Partition Key</label>
+                                    <input name="PartitionKey" type="text" class="form-control" id="PartitionKey" value="CUSTOMER" readonly />
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> Used for Azure Table partitioning
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="RowKey" class="form-label">Row Key (Customer ID)</label>
+                                    <input name="RowKey" type="text" class="form-control" id="RowKey" />
+                                    <div class="form-text">
+                                        <i class="fas fa-key"></i> Unique identifier for this customer
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-cloud"></i>
+                                <strong>Azure Table Storage Info:</strong>
+                                This data will be stored in the "Customers" table in your Azure Storage account.
+                                <br><small>Check Azure Portal: Storage accounts → klmazureapp1 → Tables → Customers</small>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/TableStorage/Customers" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-arrow-left"></i> Back to Customers
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Customer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="mt-3 text-center">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Bootstrap form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Auto-generate row key if empty
+        document.addEventListener('DOMContentLoaded', function() {
+            const rowKeyInput = document.getElementById('RowKey');
+            if (!rowKeyInput.value) {
+                rowKeyInput.value = 'CUST_' + Date.now().toString(36).toUpperCase();
+            }
+
+            // Combine first and last name for full name
+            const firstNameInput = document.getElementById('FirstName');
+            const lastNameInput = document.getElementById('LastName');
+
+            function updateFullName() {
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
+                // You can add a hidden field for full name if needed
+            }
+
+            firstNameInput.addEventListener('input', updateFullName);
+            lastNameInput.addEventListener('input', updateFullName);
+        });
+    </script>
+</body>
+</html>
